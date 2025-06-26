@@ -1,0 +1,65 @@
+import bpy
+import math
+
+# Remove existing cameras and lights to avoid duplicates
+for obj in bpy.data.objects:
+    if obj.type in {'LIGHT', 'CAMERA'}:
+        bpy.data.objects.remove(obj, do_unlink=True)
+
+# Add a camera
+bpy.ops.object.camera_add(location=(0.4, -0.6, 0.3), rotation=(math.radians(65), 0, math.radians(45)))
+camera = bpy.context.object
+camera.name = 'RenderCamera'
+
+# Set camera as active
+bpy.context.scene.camera = camera
+
+# Add area light for soft shadows
+bpy.ops.object.light_add(type='AREA', location=(0.5, -0.5, 0.7))
+light1 = bpy.context.object
+light1.data.energy = 300
+light1.data.size = 0.4
+
+# Add fill area light
+bpy.ops.object.light_add(type='AREA', location=(-0.3, -0.4, 0.5))
+light2 = bpy.context.object
+light2.data.energy = 100
+light2.data.size = 0.6
+
+# Set render engine to Cycles for photorealism
+bpy.context.scene.render.engine = 'CYCLES'
+
+# Use GPU if available
+prefs = bpy.context.preferences
+cprefs = prefs.addons['cycles'].preferences
+
+# Attempt to set GPU device if available
+cprefs.compute_device_type = 'CUDA' if 'CUDA' in cprefs.get_devices() else 'CPU'
+bpy.context.scene.cycles.device = 'GPU' if cprefs.compute_device_type == 'CUDA' else 'CPU'
+
+# Set samples and denoising
+bpy.context.scene.cycles.samples = 256
+bpy.context.scene.cycles.use_denoising = True
+
+# Set output resolution
+bpy.context.scene.render.resolution_x = 1920
+bpy.context.scene.render.resolution_y = 1080
+bpy.context.scene.render.film_transparent = True  # transparent background
+
+# Set output path and format (adjust path as needed)
+bpy.context.scene.render.filepath = "//rendered_surge_protector.png"
+bpy.context.scene.render.image_settings.file_format = 'PNG'
+
+# Optional: Add environment HDRI lighting for natural reflections (if you have an HDRI)
+# You must provide the HDRI image path or skip this
+# Example (uncomment and set your HDRI path):
+"""
+world = bpy.context.scene.world
+world.use_nodes = True
+env_node = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
+env_node.image = bpy.data.images.load('/path/to/your/hdri.hdr')
+bg_node = world.node_tree.nodes['Background']
+world.node_tree.links.new(env_node.outputs['Color'], bg_node.inputs['Color'])
+"""
+
+print("Lighting, camera, and render setup complete. Ready to render.")
