@@ -1,12 +1,11 @@
 import bpy
 import math
-import mathutils
 
 # Clear scene
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
 
-# Create wood material with texture
+# Materials
 def create_wood_material():
     mat = bpy.data.materials.new("WoodMaterial")
     mat.use_nodes = True
@@ -20,17 +19,14 @@ def create_wood_material():
     texture = nodes.new(type='ShaderNodeTexNoise')
     bump = nodes.new(type='ShaderNodeBump')
 
-    # Configure nodes
     texture.inputs['Scale'].default_value = 30.0
     texture.inputs['Detail'].default_value = 6.0
     texture.inputs['Roughness'].default_value = 0.6
 
-    # Link nodes
     links.new(texture.outputs['Fac'], bump.inputs['Height'])
     links.new(bump.outputs['Normal'], principled.inputs['Normal'])
     links.new(principled.outputs['BSDF'], output.inputs['Surface'])
 
-    # Base color brownish wood tone
     principled.inputs['Base Color'].default_value = (0.45, 0.25, 0.1, 1)
     principled.inputs['Roughness'].default_value = 0.5
 
@@ -38,48 +34,6 @@ def create_wood_material():
 
 wood_mat = create_wood_material()
 
-# Green material for succulents with slight variation function
-def create_green_material(name, color=(0.0,0.5,0.0)):
-    mat = bpy.data.materials.new(name)
-    mat.use_nodes = True
-    nodes = mat.node_tree.nodes
-    principled = nodes.get("Principled BSDF")
-    principled.inputs['Base Color'].default_value = (*color,1)
-    principled.inputs['Roughness'].default_value = 0.7
-    return mat
-
-green_mat1 = create_green_material("GreenMat1", (0.0,0.6,0.0))
-green_mat2 = create_green_material("GreenMat2", (0.0,0.45,0.1))
-green_mat3 = create_green_material("GreenMat3", (0.1,0.5,0.1))
-
-# Soil material with noise texture for roughness
-def create_soil_material():
-    mat = bpy.data.materials.new("SoilMaterial")
-    mat.use_nodes = True
-    nodes = mat.node_tree.nodes
-    links = mat.node_tree.links
-    nodes.clear()
-    output = nodes.new(type='ShaderNodeOutputMaterial')
-    principled = nodes.new(type='ShaderNodeBsdfPrincipled')
-    noise = nodes.new(type='ShaderNodeTexNoise')
-    bump = nodes.new(type='ShaderNodeBump')
-
-    noise.inputs['Scale'].default_value = 50
-    noise.inputs['Detail'].default_value = 8
-    noise.inputs['Roughness'].default_value = 0.8
-
-    links.new(noise.outputs['Fac'], bump.inputs['Height'])
-    links.new(bump.outputs['Normal'], principled.inputs['Normal'])
-    links.new(principled.outputs['BSDF'], output.inputs['Surface'])
-
-    principled.inputs['Base Color'].default_value = (0.18, 0.10, 0.05, 1)
-    principled.inputs['Roughness'].default_value = 0.9
-
-    return mat
-
-soil_mat = create_soil_material()
-
-# Black material for power strip
 black_mat = bpy.data.materials.new("BlackMat")
 black_mat.use_nodes = True
 nodes = black_mat.node_tree.nodes
@@ -87,7 +41,6 @@ principled = nodes.get("Principled BSDF")
 principled.inputs['Base Color'].default_value = (0.05, 0.05, 0.05, 1)
 principled.inputs['Roughness'].default_value = 0.2
 
-# USB gray material
 usb_mat = bpy.data.materials.new("USBMat")
 usb_mat.use_nodes = True
 nodes = usb_mat.node_tree.nodes
@@ -95,7 +48,6 @@ principled = nodes.get("Principled BSDF")
 principled.inputs['Base Color'].default_value = (0.3, 0.3, 0.3, 1)
 principled.inputs['Roughness'].default_value = 0.4
 
-# Cable material
 cable_mat = bpy.data.materials.new("CableMat")
 cable_mat.use_nodes = True
 nodes = cable_mat.node_tree.nodes
@@ -110,14 +62,14 @@ box_height = 0.08
 wall_thickness = 0.01
 planter_depth = 0.03
 
-# Create wooden box outer shell
+# Wooden box outer shell
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0,0,box_height/2))
 box_outer = bpy.context.object
 box_outer.name = "WoodBoxOuter"
 box_outer.scale = (box_length/2, box_width/2, box_height/2)
 box_outer.data.materials.append(wood_mat)
 
-# Hollow box inside by boolean modifier
+# Hollow box inside
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0,0,box_height/2 - wall_thickness))
 box_inner = bpy.context.object
 box_inner.name = "WoodBoxInner"
@@ -131,7 +83,7 @@ bpy.context.view_layer.objects.active = box_outer
 bpy.ops.object.modifier_apply(modifier=bool_mod.name)
 bpy.data.objects.remove(box_inner, do_unlink=True)
 
-# Planter cavity on top
+# Planter cavity on top (empty)
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0,0,box_height - planter_depth/2))
 planter_cavity = bpy.context.object
 planter_cavity.name = "PlanterCavity"
@@ -145,59 +97,7 @@ bpy.context.view_layer.objects.active = box_outer
 bpy.ops.object.modifier_apply(modifier=bool_mod2.name)
 bpy.data.objects.remove(planter_cavity, do_unlink=True)
 
-# Soil block in cavity
-bpy.ops.mesh.primitive_cube_add(size=1, location=(0,0,box_height - planter_depth/2))
-soil = bpy.context.object
-soil.name = "Soil"
-soil.scale = ((box_length-2*wall_thickness)/2, (box_width-2*wall_thickness)/2, planter_depth/2)
-soil.data.materials.append(soil_mat)
-
-# More detailed succulent with layered leaves
-def create_detailed_succulent(location, scale=1.0):
-    layers = 5
-    leaf_length = scale * 0.035
-    leaf_width = scale * 0.012
-    leaf_thickness = scale * 0.003
-    angle_step = 360 / 8
-
-    base = None
-    for layer in range(layers):
-        radius = scale * 0.02 + layer * 0.007
-        z_pos = location[2] + layer * leaf_thickness * 2
-        for i in range(8):
-            angle = math.radians(i * angle_step + layer * 10)
-            x = location[0] + radius * math.cos(angle)
-            y = location[1] + radius * math.sin(angle)
-            bpy.ops.mesh.primitive_cube_add(size=1, location=(x,y,z_pos))
-            leaf = bpy.context.object
-            leaf.name = f"Succulent_Leaf_{layer}_{i}"
-            leaf.scale = (leaf_length, leaf_width, leaf_thickness)
-            leaf.rotation_euler = (math.radians(25), 0, angle)
-            mat = green_mat1 if (i + layer) % 3 == 0 else green_mat2 if (i + layer) % 3 == 1 else green_mat3
-            leaf.data.materials.append(mat)
-            if base is None:
-                base = leaf
-            else:
-                leaf.select_set(True)
-                base.select_set(True)
-                bpy.context.view_layer.objects.active = base
-                bpy.ops.object.join()
-    return base
-
-# Create four succulents evenly spaced
-succulent_positions = [
-    (-box_length/4, 0, box_height - planter_depth/2 + 0.005),
-    (-box_length/12, 0, box_height - planter_depth/2 + 0.008),
-    (box_length/12, 0, box_height - planter_depth/2 + 0.005),
-    (box_length/4, 0, box_height - planter_depth/2 + 0.009),
-]
-
-succulents = []
-for pos in succulent_positions:
-    succ = create_detailed_succulent(pos)
-    succulents.append(succ)
-
-# Power strip faceplate
+# Power strip faceplate on front
 faceplate_width = 0.14
 faceplate_height = 0.05
 faceplate_thickness = 0.008
@@ -210,23 +110,19 @@ faceplate.name = "PowerStripFaceplate"
 faceplate.scale = (faceplate_width/2, faceplate_thickness/2, faceplate_height/2)
 faceplate.data.materials.append(black_mat)
 
-# Detailed outlets with holes
-
+# Outlet holes creator
 def create_outlet_hole(location):
     bpy.ops.mesh.primitive_cylinder_add(radius=0.0045, depth=0.005, location=location, rotation=(math.radians(90),0,0))
     hole = bpy.context.object
     hole.name = "OutletHole"
     return hole
 
-# Outlets base rectangles
+# Outlets base rectangles and holes
 outlet_width = 0.025
 outlet_height = 0.035
 outlet_thickness = 0.001
 outlet_spacing = 0.045
 start_x = faceplate_x - outlet_spacing
-
-outlet_bases = []
-outlet_holes = []
 
 for i in range(3):
     x = start_x + i * outlet_spacing
@@ -235,21 +131,18 @@ for i in range(3):
     base.name = f"OutletBase_{i+1}"
     base.scale = (outlet_width/2, outlet_thickness/2, outlet_height/2)
     base.data.materials.append(usb_mat)
-    outlet_bases.append(base)
 
-    # Add 3 holes per outlet (2 vertical holes + ground hole)
     hole_y = faceplate_y + 0.003
     hole_z_center = box_height/2
     hole_x = x
 
     # Two vertical holes
-    outlet_holes.append(create_outlet_hole((hole_x - 0.006, hole_y, hole_z_center + 0.008)))
-    outlet_holes.append(create_outlet_hole((hole_x + 0.006, hole_y, hole_z_center + 0.008)))
+    create_outlet_hole((hole_x - 0.006, hole_y, hole_z_center + 0.008))
+    create_outlet_hole((hole_x + 0.006, hole_y, hole_z_center + 0.008))
     # Ground hole below
-    outlet_holes.append(create_outlet_hole((hole_x, hole_y, hole_z_center - 0.007)))
+    create_outlet_hole((hole_x, hole_y, hole_z_center - 0.007))
 
 # USB ports with slot details
-
 usb_width = 0.02
 usb_height = 0.012
 usb_thickness = 0.002
@@ -266,7 +159,6 @@ for i in range(2):
     usb_base.scale = (usb_width/2, usb_thickness/2, usb_height/2)
     usb_base.data.materials.append(usb_mat)
 
-    # Add slot inside USB port
     bpy.ops.mesh.primitive_cube_add(size=1, location=(usb_x, usb_y + 0.0015, z))
     slot = bpy.context.object
     slot.name = f"USBSlot_{i+1}"
@@ -276,8 +168,6 @@ for i in range(2):
     slot.data.materials.append(slot_mat)
 
 # Power cable as a coiled curve with bevel
-
-# Create curve path for cable coil
 curve_data = bpy.data.curves.new(name='CableCurve', type='CURVE')
 curve_data.dimensions = '3D'
 polyline = curve_data.splines.new('POLY')
@@ -299,19 +189,16 @@ for i in range(num_points):
 curve_obj = bpy.data.objects.new('PowerCableCurve', curve_data)
 bpy.context.collection.objects.link(curve_obj)
 
-# Create circle for bevel object (cable thickness)
 bpy.ops.curve.primitive_bezier_circle_add(radius=radius)
 bevel_obj = bpy.context.object
 bevel_obj.name = 'CableBevel'
 
-# Assign bevel to curve
 curve_data.bevel_object = bevel_obj
 curve_data.bevel_mode = 'OBJECT'
 
-# Assign material to cable curve
 if len(curve_obj.data.materials):
     curve_obj.data.materials[0] = cable_mat
 else:
     curve_obj.data.materials.append(cable_mat)
 
-print("Enhanced succulent surge protector model created with details.")
+print("Wooden surge protector model with power strip created.")
