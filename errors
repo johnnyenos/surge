@@ -1,0 +1,257 @@
+IndentationError: unexpected indent
+
+>>>             leaf.scale = (leaf_length, leaf_width, leaf_thickness)
+  File "<blender_console>", line 1
+    leaf.scale = (leaf_length, leaf_width, leaf_thickness)
+IndentationError: unexpected indent
+
+>>>             leaf.rotation_euler = (math.radians(25), 0, angle)
+  File "<blender_console>", line 1
+    leaf.rotation_euler = (math.radians(25), 0, angle)
+IndentationError: unexpected indent
+
+>>>             mat = green_mat1 if (i + layer) % 3 == 0 else green_mat2 if (i + layer) % 3 == 1 else green_mat3
+  File "<blender_console>", line 1
+    mat = green_mat1 if (i + layer) % 3 == 0 else green_mat2 if (i + layer) % 3 == 1 else green_mat3
+IndentationError: unexpected indent
+
+>>>             leaf.data.materials.append(mat)
+  File "<blender_console>", line 1
+    leaf.data.materials.append(mat)
+IndentationError: unexpected indent
+
+>>>             if base is None:
+  File "<blender_console>", line 1
+    if base is None:
+IndentationError: unexpected indent
+
+>>>                 base = leaf
+  File "<blender_console>", line 1
+    base = leaf
+IndentationError: unexpected indent
+
+>>>             else:
+  File "<blender_console>", line 1
+    else:
+IndentationError: unexpected indent
+
+>>>                 leaf.select_set(True)
+  File "<blender_console>", line 1
+    leaf.select_set(True)
+IndentationError: unexpected indent
+
+>>>                 base.select_set(True)
+  File "<blender_console>", line 1
+    base.select_set(True)
+IndentationError: unexpected indent
+
+>>>                 bpy.context.view_layer.objects.active = base
+  File "<blender_console>", line 1
+    bpy.context.view_layer.objects.active = base
+IndentationError: unexpected indent
+
+>>>                 bpy.ops.object.join()
+  File "<blender_console>", line 1
+    bpy.ops.object.join()
+IndentationError: unexpected indent
+
+>>>     return base
+  File "<blender_console>", line 1
+    return base
+IndentationError: unexpected indent
+
+>>> 
+>>> # Create four succulents evenly spaced
+>>> succulent_positions = [
+...     (-box_length/4, 0, box_height - planter_depth/2 + 0.005),
+...     (-box_length/12, 0, box_height - planter_depth/2 + 0.008),
+...     (box_length/12, 0, box_height - planter_depth/2 + 0.005),
+...     (box_length/4, 0, box_height - planter_depth/2 + 0.009),
+... ]
+>>> 
+>>> succulents = []
+>>> for pos in succulent_positions:
+...     succ = create_detailed_succulent(pos)
+...     succulents.append(succ)
+... 
+>>> # Power strip faceplate
+>>> faceplate_width = 0.14
+>>> faceplate_height = 0.05
+>>> faceplate_thickness = 0.008
+>>> faceplate_x = 0
+>>> faceplate_y = box_width/2 + faceplate_thickness/2 - 0.001
+>>> 
+>>> bpy.ops.mesh.primitive_cube_add(size=1, location=(faceplate_x, faceplate_y, box_height/2))
+{'FINISHED'}
+
+>>> faceplate = bpy.context.object
+>>> faceplate.name = "PowerStripFaceplate"
+>>> faceplate.scale = (faceplate_width/2, faceplate_thickness/2, faceplate_height/2)
+>>> faceplate.data.materials.append(black_mat)
+>>> 
+>>> # Detailed outlets with holes
+>>> 
+>>> def create_outlet_hole(location):
+...     bpy.ops.mesh.primitive_cylinder_add(radius=0.0045, depth=0.005, location=location, rotation=(math.radians(90),0,0))
+...     hole = bpy.context.object
+...     hole.name = "OutletHole"
+...     return hole
+... 
+>>> # Outlets base rectangles
+>>> outlet_width = 0.025
+>>> outlet_height = 0.035
+>>> outlet_thickness = 0.001
+>>> outlet_spacing = 0.045
+>>> start_x = faceplate_x - outlet_spacing
+>>> 
+>>> outlet_bases = []
+>>> outlet_holes = []
+>>> 
+>>> for i in range(3):
+...     x = start_x + i * outlet_spacing
+...     bpy.ops.mesh.primitive_cube_add(size=1, location=(x, faceplate_y + 0.002, box_height/2))
+...     base = bpy.context.object
+...     base.name = f"OutletBase_{i+1}"
+...     base.scale = (outlet_width/2, outlet_thickness/2, outlet_height/2)
+...     base.data.materials.append(usb_mat)
+...     outlet_bases.append(base)
+... 
+{'FINISHED'}
+{'FINISHED'}
+{'FINISHED'}
+
+>>>     # Add 3 holes per outlet (2 vertical holes + ground hole)
+>>>     hole_y = faceplate_y + 0.003
+  File "<blender_console>", line 1
+    hole_y = faceplate_y + 0.003
+IndentationError: unexpected indent
+
+>>>     hole_z_center = box_height/2
+  File "<blender_console>", line 1
+    hole_z_center = box_height/2
+IndentationError: unexpected indent
+
+>>>     hole_x = x
+  File "<blender_console>", line 1
+    hole_x = x
+IndentationError: unexpected indent
+
+>>> 
+>>>     # Two vertical holes
+>>>     outlet_holes.append(create_outlet_hole((hole_x - 0.006, hole_y, hole_z_center + 0.008)))
+  File "<blender_console>", line 1
+    outlet_holes.append(create_outlet_hole((hole_x - 0.006, hole_y, hole_z_center + 0.008)))
+IndentationError: unexpected indent
+
+>>>     outlet_holes.append(create_outlet_hole((hole_x + 0.006, hole_y, hole_z_center + 0.008)))
+  File "<blender_console>", line 1
+    outlet_holes.append(create_outlet_hole((hole_x + 0.006, hole_y, hole_z_center + 0.008)))
+IndentationError: unexpected indent
+
+>>>     # Ground hole below
+>>>     outlet_holes.append(create_outlet_hole((hole_x, hole_y, hole_z_center - 0.007)))
+  File "<blender_console>", line 1
+    outlet_holes.append(create_outlet_hole((hole_x, hole_y, hole_z_center - 0.007)))
+IndentationError: unexpected indent
+
+>>> 
+>>> # USB ports with slot details
+>>> 
+>>> usb_width = 0.02
+>>> usb_height = 0.012
+>>> usb_thickness = 0.002
+>>> 
+>>> usb_x = faceplate_x + faceplate_width/2 - usb_width/2 - 0.01
+>>> usb_y = faceplate_y + 0.002
+>>> usb_z_start = box_height/2 + usb_height/2
+>>> 
+>>> for i in range(2):
+...     z = usb_z_start - i * (usb_height + 0.008)
+...     bpy.ops.mesh.primitive_cube_add(size=1, location=(usb_x, usb_y, z))
+...     usb_base = bpy.context.object
+...     usb_base.name = f"USBPortBase_{i+1}"
+...     usb_base.scale = (usb_width/2, usb_thickness/2, usb_height/2)
+...     usb_base.data.materials.append(usb_mat)
+... 
+{'FINISHED'}
+{'FINISHED'}
+
+>>>     # Add slot inside USB port
+>>>     bpy.ops.mesh.primitive_cube_add(size=1, location=(usb_x, usb_y + 0.0015, z))
+  File "<blender_console>", line 1
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(usb_x, usb_y + 0.0015, z))
+IndentationError: unexpected indent
+
+>>>     slot = bpy.context.object
+  File "<blender_console>", line 1
+    slot = bpy.context.object
+IndentationError: unexpected indent
+
+>>>     slot.name = f"USBSlot_{i+1}"
+  File "<blender_console>", line 1
+    slot.name = f"USBSlot_{i+1}"
+IndentationError: unexpected indent
+
+>>>     slot.scale = (usb_width/3, usb_thickness*2, usb_height/6)
+  File "<blender_console>", line 1
+    slot.scale = (usb_width/3, usb_thickness*2, usb_height/6)
+IndentationError: unexpected indent
+
+>>>     slot_mat = bpy.data.materials.new("SlotMat")
+  File "<blender_console>", line 1
+    slot_mat = bpy.data.materials.new("SlotMat")
+IndentationError: unexpected indent
+
+>>>     slot_mat.diffuse_color = (0,0,0,1)
+  File "<blender_console>", line 1
+    slot_mat.diffuse_color = (0,0,0,1)
+IndentationError: unexpected indent
+
+>>>     slot.data.materials.append(slot_mat)
+  File "<blender_console>", line 1
+    slot.data.materials.append(slot_mat)
+IndentationError: unexpected indent
+
+>>> 
+>>> # Power cable as a coiled curve with bevel
+>>> 
+>>> # Create curve path for cable coil
+>>> curve_data = bpy.data.curves.new(name='CableCurve', type='CURVE')
+>>> curve_data.dimensions = '3D'
+>>> polyline = curve_data.splines.new('POLY')
+>>> num_points = 50
+>>> polyline.points.add(num_points-1)
+>>> 
+>>> radius = 0.007
+>>> coil_radius = 0.02
+>>> coil_turns = 3
+>>> height = 0.12
+>>> 
+>>> for i in range(num_points):
+...     angle = (coil_turns * 2 * math.pi) * (i / (num_points - 1))
+...     x = box_length/2 + coil_radius * math.cos(angle)
+...     y = coil_radius * math.sin(angle)
+...     z = i * (height / (num_points - 1))
+...     polyline.points[i].co = (x, y, z, 1)
+... 
+>>> curve_obj = bpy.data.objects.new('PowerCableCurve', curve_data)
+>>> bpy.context.collection.objects.link(curve_obj)
+>>> 
+>>> # Create circle for bevel object (cable thickness)
+>>> bpy.ops.curve.primitive_bezier_circle_add(radius=radius)
+{'FINISHED'}
+
+>>> bevel_obj = bpy.context.object
+>>> bevel_obj.name = 'CableBevel'
+>>> 
+>>> # Assign bevel to curve
+>>> curve_data.bevel_object = bevel_obj
+>>> curve_data.bevel_mode = 'OBJECT'
+>>> 
+>>> # Assign material to cable curve
+>>> if len(curve_obj.data.materials):
+...     curve_obj.data.materials[0] = cable_mat
+... else:
+...     curve_obj.data.materials.append(cable_mat)
+... 
+>>> print("Enhanced succulent surge protector model created with details.")
